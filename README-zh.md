@@ -34,29 +34,17 @@ cd windows-to-wsl2-screenshots
 
 ### 2. 设置自动加载（在 WSL2 中执行）
 
-将截图函数添加到你的 shell 配置文件中，实现自动启动。
+将截图函数添加到你的 shell 配置文件中。
 
-**选项 A：zsh 用户**（一次性复制粘贴所有行）：
+**zsh 用户**：
 ```bash
 echo "source $(pwd)/screenshot-functions.sh" >> ~/.zshrc
-echo "" >> ~/.zshrc
-echo "# 智能启动截图监控（只在未运行时启动）" >> ~/.zshrc
-echo "if ! pgrep -f \"auto-clipboard-monitor\" > /dev/null 2>&1; then" >> ~/.zshrc
-echo "    start-screenshot-monitor" >> ~/.zshrc
-echo "fi" >> ~/.zshrc
 ```
 
-**选项 B：bash 用户**（一次性复制粘贴所有行）：
+**bash 用户**：
 ```bash
 echo "source $(pwd)/screenshot-functions.sh" >> ~/.bashrc
-echo "" >> ~/.bashrc
-echo "# 智能启动截图监控（只在未运行时启动）" >> ~/.bashrc
-echo "if ! pgrep -f \"auto-clipboard-monitor\" > /dev/null 2>&1; then" >> ~/.bashrc
-echo "    start-screenshot-monitor" >> ~/.bashrc
-echo "fi" >> ~/.bashrc
 ```
-
-💡 **使用方法**：只需复制适合你的 shell 类型的整个代码块（所有 echo 行），然后粘贴到你的 WSL2 终端中。多个 echo 命令会依次自动执行。
 
 ### 3. 重新加载配置或重启终端
 
@@ -69,12 +57,18 @@ source ~/.zshrc  # 或 source ~/.bashrc
 
 ## 使用方法
 
-### 🚀 自动启动模式（推荐）
+### 🚀 手动启动模式
 
-完成安装后，每次打开新终端时截图监控器会自动启动。你只需要：
+当你需要使用截图监控功能时：
 
-1. **拍摄截图**（Win+Shift+S、Win+PrintScreen 等）
-2. **直接粘贴**（Ctrl+V）到 Claude Code、VS Code 或任何 WSL2 应用程序
+1. **启动监控器**（在 WSL2 中执行）：
+   ```bash
+   start-screenshot-monitor
+   ```
+2. **拍摄截图**（Win+Shift+S、Win+PrintScreen 等）
+3. **直接粘贴**（Ctrl+V）到 Claude Code、VS Code 或任何 WSL2 应用程序
+
+💡 **注意**：监控器需要在你想使用此功能时手动启动。这让你可以控制何时自动处理截图，在不需要时保留正常的 Windows 截图行为。
 
 ### 🔧 手动控制命令（在 WSL2 中执行）
 
@@ -82,7 +76,7 @@ source ~/.zshrc  # 或 source ~/.bashrc
 # 检查状态
 check-screenshot-monitor
 
-# 手动启动（通常不需要，会自动启动）
+# 启动监控器
 start-screenshot-monitor
 
 # 停止监控
@@ -104,13 +98,12 @@ clean-screenshots
 screenshot-help
 ```
 
-### 💡 智能启动说明
+### 💡 使用提示
 
-- **电脑重启后**：第一次打开终端时自动启动监控器
-- **避免重复启动**：如果监控器已经运行，不会重复启动
-- **后台持续运行**：关闭终端后监控器继续工作
-
-现在只需拍截图，路径会自动复制到剪贴板，直接粘贴到 Claude Code、VS Code 或任何 WSL2 应用中！
+- **手动控制**：仅在需要使用截图功能时启动监控器
+- **保留正常行为**：监控器停止时，Windows 截图功能正常工作
+- **后台持续运行**：一旦启动，关闭终端后监控器继续工作
+- **完成后停止**：运行 `stop-screenshot-monitor` 恢复正常的 Windows 截图行为
 
 ## 🎬 演示
 
@@ -150,17 +143,13 @@ check-screenshot-monitor
 ps aux | grep -i clipboard
 ```
 
-**自动启动不工作？**
+**函数未加载？**
 ```bash
 # 检查 shell 配置文件
 grep -n "screenshot-functions" ~/.zshrc  # 或 ~/.bashrc
 
-# 手动测试智能启动逻辑
-if ! pgrep -f "auto-clipboard-monitor" > /dev/null 2>&1; then
-    echo "监控器未运行，需要启动"
-else
-    echo "监控器已运行"
-fi
+# 重新加载 shell 配置
+source ~/.zshrc  # 或 ~/.bashrc
 ```
 
 ## 技术说明

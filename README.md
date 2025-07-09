@@ -34,29 +34,17 @@ cd windows-to-wsl2-screenshots
 
 ### 2. Setup auto-loading (run in WSL2)
 
-Add screenshot functions to your shell config file for automatic startup.
+Add screenshot functions to your shell config file.
 
-**Option A: For zsh users** (copy and paste all lines at once):
+**For zsh users**:
 ```bash
 echo "source $(pwd)/screenshot-functions.sh" >> ~/.zshrc
-echo "" >> ~/.zshrc
-echo "# Smart screenshot monitor startup (only starts if not running)" >> ~/.zshrc
-echo "if ! pgrep -f \"auto-clipboard-monitor\" > /dev/null 2>&1; then" >> ~/.zshrc
-echo "    start-screenshot-monitor" >> ~/.zshrc
-echo "fi" >> ~/.zshrc
 ```
 
-**Option B: For bash users** (copy and paste all lines at once):
+**For bash users**:
 ```bash
 echo "source $(pwd)/screenshot-functions.sh" >> ~/.bashrc
-echo "" >> ~/.bashrc
-echo "# Smart screenshot monitor startup (only starts if not running)" >> ~/.bashrc
-echo "if ! pgrep -f \"auto-clipboard-monitor\" > /dev/null 2>&1; then" >> ~/.bashrc
-echo "    start-screenshot-monitor" >> ~/.bashrc
-echo "fi" >> ~/.bashrc
 ```
-
-💡 **How to use**: Simply copy the entire code block (all echo lines) for your shell type and paste it into your WSL2 terminal. The multiple echo commands will execute one after another automatically.
 
 ### 3. Reload configuration or restart terminal
 
@@ -69,12 +57,18 @@ source ~/.zshrc  # or source ~/.bashrc
 
 ## Usage
 
-### 🚀 Auto-start mode (recommended)
+### 🚀 Manual start mode
 
-After installation, the screenshot monitor will automatically start each time you open a new terminal. You just need to:
+When you need to use the screenshot monitoring feature:
 
-1. **Take screenshot** (Win+Shift+S, Win+PrintScreen, etc.)
-2. **Paste directly** (Ctrl+V) into Claude Code, VS Code, or any WSL2 application
+1. **Start the monitor** (run in WSL2):
+   ```bash
+   start-screenshot-monitor
+   ```
+2. **Take screenshot** (Win+Shift+S, Win+PrintScreen, etc.)
+3. **Paste directly** (Ctrl+V) into Claude Code, VS Code, or any WSL2 application
+
+💡 **Note**: The monitor needs to be manually started when you want to use this feature. This gives you control over when screenshots are automatically processed, preserving normal Windows screenshot behavior when not needed.
 
 ### 🔧 Manual control commands (run in WSL2)
 
@@ -104,13 +98,12 @@ clean-screenshots
 screenshot-help
 ```
 
-### 💡 Smart startup explanation
+### 💡 Usage tips
 
-- **After computer restart**: Monitor automatically starts when first terminal opens
-- **Avoid duplicate startup**: Won't start if monitor is already running
-- **Background persistence**: Monitor continues working after closing terminal
-
-Now just take screenshots and the path will automatically copy to clipboard, ready for pasting into Claude Code, VS Code, or any WSL2 application!
+- **Manual control**: Start the monitor only when you need to use the screenshot feature
+- **Preserve normal behavior**: When monitor is stopped, Windows screenshots work normally
+- **Background persistence**: Once started, monitor continues working after closing terminal
+- **Stop when done**: Run `stop-screenshot-monitor` to restore normal Windows screenshot behavior
 
 ## 🎬 Demo
 
@@ -150,17 +143,13 @@ check-screenshot-monitor
 ps aux | grep -i clipboard
 ```
 
-**Auto-start not working?**
+**Functions not loading?**
 ```bash
 # Check shell config file
 grep -n "screenshot-functions" ~/.zshrc  # or ~/.bashrc
 
-# Manually test smart startup logic
-if ! pgrep -f "auto-clipboard-monitor" > /dev/null 2>&1; then
-    echo "Monitor not running, needs to start"
-else
-    echo "Monitor is running"
-fi
+# Reload your shell config
+source ~/.zshrc  # or ~/.bashrc
 ```
 
 ## Technical Details
