@@ -32,9 +32,9 @@ gh repo clone jddev273/windows-to-wsl2-screenshots
 cd windows-to-wsl2-screenshots
 ```
 
-### 2. 设置自动加载（在 WSL2 中执行）
+### 2. 设置命令函数（在 WSL2 中执行）
 
-将截图函数添加到你的 shell 配置文件中。
+将截图函数添加到你的 shell 配置文件中。**注意**：这只是将命令函数加载到你的 shell 中 - 并不会自动启动截图监控服务。
 
 **zsh 用户**：
 ```bash
@@ -54,6 +54,8 @@ source ~/.zshrc  # 或 source ~/.bashrc
 
 # 或者直接重启终端
 ```
+
+✅ **安装完成！** 截图函数现在已经可以在你的终端中使用了。**监控服务还没有运行** - 你需要在需要时手动启动它（参见下面的使用方法部分）。
 
 ## 使用方法
 
@@ -139,11 +141,14 @@ ls -la auto-clipboard-monitor.ps1
 
 **截图没有自动保存？**
 ```bash
-# 检查监控器状态（在 WSL2 中执行）
+# 使用增强检测功能检查监控器状态（在 WSL2 中执行）
 check-screenshot-monitor
 
-# 查看 Windows 进程（在 WSL2 中执行）
-ps aux | grep -i clipboard
+# 检查命令现在提供详细的状态信息：
+# ✅ 正常运行：信号文件和 PowerShell 进程都存在
+# ❌ 完全停止：信号文件和 PowerShell 进程都不存在
+# ⚠️ 孤立进程：PowerShell 进程运行但信号文件缺失
+# ⚠️ 进程崩溃：信号文件存在但 PowerShell 进程未运行
 ```
 
 **函数未加载？**
@@ -168,9 +173,11 @@ source ~/.zshrc  # 或 ~/.bashrc
 
 2. **WSL2 管理脚本**（`screenshot-functions.sh`）
    - 提供便捷的控制命令
+   - 增强的监控器检测，具备双层状态检查
    - 智能启动/停止监控器，使用信号文件通信
    - 文件管理和路径复制功能
    - 跨 WSL2-Windows 边界的可靠进程生命周期管理
+   - 高级进程状态检测，处理孤立进程问题
 
 ### ⚠️ 安全说明
 

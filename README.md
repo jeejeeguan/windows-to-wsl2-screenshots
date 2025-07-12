@@ -32,9 +32,9 @@ gh repo clone jddev273/windows-to-wsl2-screenshots
 cd windows-to-wsl2-screenshots
 ```
 
-### 2. Setup auto-loading (run in WSL2)
+### 2. Setup command functions (run in WSL2)
 
-Add screenshot functions to your shell config file.
+Add screenshot functions to your shell config file. **Note**: This only loads the command functions into your shell - it does NOT automatically start the screenshot monitoring service.
 
 **For zsh users**:
 ```bash
@@ -54,6 +54,8 @@ source ~/.zshrc  # or source ~/.bashrc
 
 # Or simply restart terminal
 ```
+
+✅ **Installation complete!** The screenshot functions are now available in your terminal. **The monitoring service is NOT running yet** - you'll need to manually start it when needed (see Usage section below).
 
 ## Usage
 
@@ -139,11 +141,14 @@ ls -la auto-clipboard-monitor.ps1
 
 **Screenshots not auto-saving?**
 ```bash
-# Check monitor status (run in WSL2)
+# Check monitor status with enhanced detection (run in WSL2)
 check-screenshot-monitor
 
-# View Windows processes (run in WSL2)
-ps aux | grep -i clipboard
+# The check command now provides detailed status information:
+# ✅ Active: Both signal file and PowerShell process running
+# ❌ Stopped: Neither signal file nor PowerShell process found
+# ⚠️ Orphaned: PowerShell process running but signal file missing
+# ⚠️ Crashed: Signal file exists but PowerShell process not running
 ```
 
 **Functions not loading?**
@@ -168,9 +173,11 @@ source ~/.zshrc  # or ~/.bashrc
 
 2. **WSL2 Management Script** (`screenshot-functions.sh`)
    - Provides convenient control commands
+   - Enhanced monitor detection with dual-layer status checking
    - Smart start/stop monitor functionality with signal file communication
    - File management and path copying features
    - Reliable process lifecycle management across WSL2-Windows boundary
+   - Advanced process state detection to handle orphaned processes
 
 ### ⚠️ Security Notes
 

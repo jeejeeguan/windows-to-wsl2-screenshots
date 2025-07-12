@@ -3,8 +3,8 @@
 # Windows-to-WSL2 Screenshot Automation Functions
 # Auto-saves screenshots from Windows clipboard to WSL2 and manages clipboard sync
 
-# Set installation directory when sourced
-SCREENSHOT_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Set installation directory - use absolute path to ensure it works from anywhere
+SCREENSHOT_INSTALL_DIR="/home/jeejee/projects/windows-to-wsl2-screenshots"
 
 # Start the auto-screenshot monitor
 start-screenshot-monitor() {
@@ -33,7 +33,8 @@ start-screenshot-monitor() {
     fi
     
     # Start the monitor in background (will stop when terminal closes)
-    powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "$ps_script" > "$HOME/.screenshots/monitor.log" 2>&1 &
+    nohup powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "$ps_script" > "$HOME/.screenshots/monitor.log" 2>&1 < /dev/null &
+    disown
     
     echo "✅ SCREENSHOT AUTOMATION IS NOW RUNNING!"
     echo ""
@@ -60,21 +61,45 @@ stop-screenshot-monitor() {
     # Also stop any WSL session processes
     pkill -f "auto-clipboard-monitor" 2>/dev/null || true
     
+    # Force kill any orphaned PowerShell processes
+    powershell.exe -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*auto-clipboard-monitor.ps1*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" 2>/dev/null || true
+    
     echo "✅ Screenshot automation stopped"
-    echo "💡 PowerShell process will exit when it detects the stop signal"
+    echo "💡 All related processes have been terminated"
 }
 
 # Check if running
 check-screenshot-monitor() {
+    local signal_file_exists=false
+    local powershell_process_exists=false
+    
     # Check if signal file exists (indicates PowerShell should be running)
     if [ -f "$HOME/.screenshots/.monitor_active" ]; then
+        signal_file_exists=true
+    fi
+    
+    # Check if PowerShell monitor process is actually running in Windows
+    if powershell.exe -Command "Get-CimInstance Win32_Process | Where-Object { \$_.CommandLine -like '*auto-clipboard-monitor.ps1*' } | Select-Object -First 1" 2>/dev/null | grep -q "auto-clipboard-monitor"; then
+        powershell_process_exists=true
+    fi
+    
+    # Determine status based on both checks
+    if [ "$signal_file_exists" = true ] && [ "$powershell_process_exists" = true ]; then
         echo "✅ Screenshot automation is active"
         echo "🔥 Just take screenshots - everything is automatic!"
         echo "📁 Saves to: $HOME/.screenshots/"
         echo "📋 Paths automatically copied to clipboard for easy pasting!"
-    else
+    elif [ "$signal_file_exists" = false ] && [ "$powershell_process_exists" = false ]; then
         echo "❌ Screenshot automation not running"
         echo "💡 Start with: start-screenshot-monitor"
+    elif [ "$signal_file_exists" = false ] && [ "$powershell_process_exists" = true ]; then
+        echo "⚠️  Orphaned PowerShell monitor process detected"
+        echo "🔧 This is a leftover process from a previous session"
+        echo "💡 Run 'stop-screenshot-monitor' to clean up, then 'start-screenshot-monitor'"
+    elif [ "$signal_file_exists" = true ] && [ "$powershell_process_exists" = false ]; then
+        echo "⚠️  Signal file exists but PowerShell monitor process not found"
+        echo "🔧 The PowerShell process may have exited unexpectedly"
+        echo "💡 Run 'stop-screenshot-monitor' to clean up, then 'start-screenshot-monitor'"
     fi
 }
 

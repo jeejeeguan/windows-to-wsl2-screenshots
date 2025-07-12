@@ -45,6 +45,7 @@ $lastFileTime = Get-Date
 # WSL session check variables
 $sessionCheckInterval = 50  # Check every 25 seconds (50 * 500ms)
 $loopCount = 0
+$sessionPid = $null
 
 # Function to copy path to both clipboards
 function Set-BothClipboards($path) {
@@ -79,15 +80,44 @@ while ($true) {
                 exit 0
             }
             
-            # Check if WSL session is still active
+            # Enhanced session check: verify both WSL availability and session continuity
+            $sessionActive = $false
             try {
+                # Check if WSL distro is available
                 $null = wsl.exe -d $WslDistro -e echo "ping" 2>$null
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Host "WSL session lost, exiting monitor..."
-                    exit 0
+                if ($LASTEXITCODE -eq 0) {
+                    # Check if original session PID is still accessible via WSL
+                    if ($sessionPid) {
+                        $pidCheck = wsl.exe -d $WslDistro -e bash -c "kill -0 $sessionPid 2>/dev/null; echo `$?"
+                        if ($pidCheck -and $pidCheck.Trim() -eq "0") {
+                            $sessionActive = $true
+                        }
+                    } else {
+                        # If no session PID stored, try to get it from signal file
+                        try {
+                            $pidFromFile = wsl.exe -d $WslDistro -e cat "/home/$WslUsername/.screenshots/.monitor_active" 2>$null
+                            if ($pidFromFile -and $pidFromFile.Trim() -match '^\d+$') {
+                                $sessionPid = $pidFromFile.Trim()
+                                $pidCheck = wsl.exe -d $WslDistro -e bash -c "kill -0 $sessionPid 2>/dev/null; echo `$?"
+                                if ($pidCheck -and $pidCheck.Trim() -eq "0") {
+                                    $sessionActive = $true
+                                }
+                            }
+                        } catch {
+                            # Signal file might not contain valid PID, treat as session lost
+                        }
+                    }
                 }
             } catch {
-                Write-Host "WSL session lost, exiting monitor..."
+                # WSL communication failed
+            }
+            
+            if (-not $sessionActive) {
+                Write-Host "WSL session ended or became inaccessible, exiting monitor..."
+                # Clean up signal file before exiting
+                try {
+                    Remove-Item "$SaveDirectory\.monitor_active" -Force -ErrorAction SilentlyContinue
+                } catch {}
                 exit 0
             }
         }
