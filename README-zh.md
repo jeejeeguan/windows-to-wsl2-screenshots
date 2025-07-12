@@ -28,7 +28,7 @@
 ### 1. 克隆仓库（在 WSL2 中执行）
 
 ```bash
-gh repo clone jddev273/windows-to-wsl2-screenshots
+gh repo clone jeejeeguan/windows-to-wsl2-screenshots
 cd windows-to-wsl2-screenshots
 ```
 
@@ -194,4 +194,6 @@ source ~/.zshrc  # 或 ~/.bashrc
 
 ---
 
-**由 Johann Döwa 创建** | 为 Claude Code 社区用心制作 ❤️
+**Fork 自 [jddev273/windows-to-wsl2-screenshots](https://github.com/jddev273/windows-to-wsl2-screenshots)** - 由 Johann Döwa 创建
+
+**由 jeejeeguan 增强和维护** | 为 Claude Code 社区用心制作 ❤️

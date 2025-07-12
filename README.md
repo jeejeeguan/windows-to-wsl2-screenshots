@@ -28,7 +28,7 @@ Perfect for Claude Code workflows, VS Code documentation, or any development sce
 ### 1. Clone repository (run in WSL2)
 
 ```bash
-gh repo clone jddev273/windows-to-wsl2-screenshots
+gh repo clone jeejeeguan/windows-to-wsl2-screenshots
 cd windows-to-wsl2-screenshots
 ```
 
@@ -195,4 +195,6 @@ source ~/.zshrc  # or ~/.bashrc
 
 ---
 
-**Created by Johann Döwa** | Made with ❤️ for the Claude Code community
+**Forked from [jddev273/windows-to-wsl2-screenshots](https://github.com/jddev273/windows-to-wsl2-screenshots)** - Created by Johann Döwa
+
+**Enhanced and maintained by jeejeeguan** | Made with ❤️ for the Claude Code community
