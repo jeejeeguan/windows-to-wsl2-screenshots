@@ -10,11 +10,18 @@ SCREENSHOT_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 start-screenshot-monitor() {
     echo "🚀 Starting Windows-to-WSL2 screenshot automation..."
     
-    # Kill any existing monitors
+    # Clean up any existing monitors from current WSL session
+    echo "🧹 Cleaning up any existing monitors..."
     pkill -f "auto-clipboard-monitor" 2>/dev/null || true
+    
+    # Small delay to ensure cleanup
+    sleep 1
     
     # Create screenshots directory in home
     mkdir -p "$HOME/.screenshots"
+    
+    # Create signal file to communicate with PowerShell
+    echo $$ > "$HOME/.screenshots/.monitor_active"
     
     # Use the installation directory
     local ps_script="$SCREENSHOT_INSTALL_DIR/auto-clipboard-monitor.ps1"
@@ -40,20 +47,28 @@ start-screenshot-monitor() {
     echo "🔗 Latest always at: $HOME/.screenshots/latest.png"
     echo "📋 Drag & drop images to $HOME/.screenshots/ also works!"
     echo ""
-    echo "⚠️  NOTE: Service will stop when you close this terminal"
+    echo "⚠️  NOTE: Service auto-stops when you close this terminal or WSL session"
 }
 
 # Stop the monitor
 stop-screenshot-monitor() {
     echo "🛑 Stopping screenshot automation..."
+    
+    # Remove signal file to tell PowerShell to exit
+    rm -f "$HOME/.screenshots/.monitor_active"
+    
+    # Also stop any WSL session processes
     pkill -f "auto-clipboard-monitor" 2>/dev/null || true
+    
     echo "✅ Screenshot automation stopped"
+    echo "💡 PowerShell process will exit when it detects the stop signal"
 }
 
 # Check if running
 check-screenshot-monitor() {
-    if pgrep -f "auto-clipboard-monitor" > /dev/null 2>&1; then
-        echo "✅ Screenshot automation is running"
+    # Check if signal file exists (indicates PowerShell should be running)
+    if [ -f "$HOME/.screenshots/.monitor_active" ]; then
+        echo "✅ Screenshot automation is active"
         echo "🔥 Just take screenshots - everything is automatic!"
         echo "📁 Saves to: $HOME/.screenshots/"
         echo "📋 Paths automatically copied to clipboard for easy pasting!"
@@ -139,6 +154,24 @@ clean-screenshots() {
     fi
 }
 
+# Debug monitor processes
+debug-screenshot-monitor() {
+    echo "🔍 Debug: Screenshot Monitor Status"
+    echo "==================================="
+    echo ""
+    echo "📋 Current WSL session processes:"
+    ps aux | grep -E "auto-clipboard-monitor" | grep -v grep || echo "  No monitor processes found in current session"
+    echo ""
+    echo "📁 Monitor log (last 20 lines):"
+    if [ -f "$HOME/.screenshots/monitor.log" ]; then
+        tail -20 "$HOME/.screenshots/monitor.log"
+    else
+        echo "  No log file found"
+    fi
+    echo ""
+    echo "💡 Note: PowerShell processes now auto-exit when WSL session ends"
+}
+
 # Show help
 screenshot-help() {
     echo "🚀 Windows-to-WSL2 Screenshot Automation"
@@ -153,6 +186,7 @@ screenshot-help() {
     echo "  list-screenshots            - List all available screenshots"
     echo "  open-screenshots            - Open screenshots directory"
     echo "  clean-screenshots [count]   - Clean old screenshots (default: keep 10)"
+    echo "  debug-screenshot-monitor    - Show debug info for troubleshooting"
     echo "  screenshot-help             - Show this help"
     echo ""
     echo "🔥 Quick start:"
@@ -169,3 +203,4 @@ alias copy-latest='copy-latest-screenshot'
 alias start-screenshots='start-screenshot-monitor'
 alias stop-screenshots='stop-screenshot-monitor'
 alias check-screenshots='check-screenshot-monitor'
+alias debug-screenshots='debug-screenshot-monitor'

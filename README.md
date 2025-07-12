@@ -70,7 +70,7 @@ When you need to use the screenshot monitoring feature:
 
 💡 **Note**: The monitor needs to be manually started when you want to use this feature. This gives you control over when screenshots are automatically processed, preserving normal Windows screenshot behavior when not needed.
 
-⚠️ **Important**: The service will automatically stop when you close the terminal. This ensures normal Windows screenshot functionality is restored after your session ends.
+⚠️ **Important**: The service will automatically stop when you close the terminal or run `stop-screenshot-monitor`. This ensures normal Windows screenshot functionality is restored after your session ends.
 
 ### 🔧 Manual control commands (run in WSL2)
 
@@ -103,9 +103,10 @@ screenshot-help
 ### 💡 Usage tips
 
 - **Manual control**: Start the monitor only when you need to use the screenshot feature
-- **Preserve normal behavior**: When monitor is stopped, Windows screenshots work normally
+- **Preserve normal behavior**: When monitor is stopped, Windows screenshots work normally  
 - **Session-based**: Service stops automatically when terminal closes (no background persistence)
-- **Stop manually**: Run `stop-screenshot-monitor` to stop before closing terminal
+- **Stop manually**: Run `stop-screenshot-monitor` to stop immediately
+- **Reliable stopping**: Both manual stop and terminal close will properly terminate the PowerShell process
 
 ## 🎬 Demo
 
@@ -162,12 +163,14 @@ source ~/.zshrc  # or ~/.bashrc
    - Runs in Windows background while terminal is open
    - Auto-saves to WSL2's `~/.screenshots/` directory when image detected
    - Copies file path to both Windows and WSL2 clipboard
-   - Stops automatically when terminal closes
+   - Stops automatically when terminal closes or stop command is issued
+   - Uses signal file communication for reliable process management
 
 2. **WSL2 Management Script** (`screenshot-functions.sh`)
    - Provides convenient control commands
-   - Smart start/stop monitor functionality
+   - Smart start/stop monitor functionality with signal file communication
    - File management and path copying features
+   - Reliable process lifecycle management across WSL2-Windows boundary
 
 ### ⚠️ Security Notes
 

@@ -42,6 +42,10 @@ Write-Host "Monitoring clipboard events and directory changes..."
 $previousHash = $null
 $lastFileTime = Get-Date
 
+# WSL session check variables
+$sessionCheckInterval = 50  # Check every 25 seconds (50 * 500ms)
+$loopCount = 0
+
 # Function to copy path to both clipboards
 function Set-BothClipboards($path) {
     try {
@@ -66,6 +70,28 @@ function Set-BothClipboards($path) {
 while ($true) {
     try {
         Start-Sleep -Milliseconds 500
+        
+        # Check if we should continue running
+        if (($loopCount % $sessionCheckInterval) -eq 0) {
+            # Check if signal file exists (manual stop)
+            if (!(Test-Path "$SaveDirectory\.monitor_active")) {
+                Write-Host "Stop signal detected, exiting monitor..."
+                exit 0
+            }
+            
+            # Check if WSL session is still active
+            try {
+                $null = wsl.exe -d $WslDistro -e echo "ping" 2>$null
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "WSL session lost, exiting monitor..."
+                    exit 0
+                }
+            } catch {
+                Write-Host "WSL session lost, exiting monitor..."
+                exit 0
+            }
+        }
+        $loopCount++
         
         if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
             $image = [System.Windows.Forms.Clipboard]::GetImage()
