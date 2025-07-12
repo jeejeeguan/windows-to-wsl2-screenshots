@@ -5,18 +5,24 @@
 
 # Set installation directory dynamically to work for all users
 # Use multiple fallback methods to ensure reliable path detection
-if [ -n "${BASH_SOURCE[0]}" ]; then
-    SCREENSHOT_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-else
-    # Fallback: assume script is in current directory
-    SCREENSHOT_INSTALL_DIR="$(pwd)"
+# -------- Detect installation directory in bash *or* zsh ----------
+if [ -n "${BASH_SOURCE:-}" ]; then           # bash
+  _SCRIPT_PATH="${BASH_SOURCE[0]}"
+elif [ -n "$ZSH_VERSION" ]; then            # zsh
+  _SCRIPT_PATH="${(%):-%x}"
+else                                        # fallback (dash etc.)
+  _SCRIPT_PATH="$0"
 fi
+
+SCREENSHOT_INSTALL_DIR="$(cd "$(dirname "$_SCRIPT_PATH")" && pwd)"
+unset _SCRIPT_PATH
+# -------------------------------------------------------------------
 
 # Validate installation directory and provide helpful feedback
 if [ ! -f "$SCREENSHOT_INSTALL_DIR/auto-clipboard-monitor.ps1" ]; then
     echo "⚠️  WARNING: PowerShell script not found in detected directory"
     echo "📍 Detected directory: $SCREENSHOT_INSTALL_DIR"
-    echo "🔍 BASH_SOURCE[0]: ${BASH_SOURCE[0]:-'(not set)'}"
+    echo "🔍 Shell: $SHELL"
     echo "💡 Please ensure you've cloned the repository completely"
     echo "💡 Make sure to source this script from the project directory"
 fi
@@ -45,7 +51,7 @@ start-screenshot-monitor() {
         echo "❌ PowerShell script not found!"
         echo "📍 Expected location: $ps_script"
         echo "🔍 Installation directory: $SCREENSHOT_INSTALL_DIR"
-        echo "🔍 Script file sourced from: ${BASH_SOURCE[0]}"
+        echo "🔍 Current shell: $SHELL"
         echo "💡 Solution: Make sure you've cloned the complete repository and sourced from the correct location"
         echo "💡 Try: cd /path/to/windows-to-wsl2-screenshots && source screenshot-functions.sh"
         return 1
