@@ -70,6 +70,8 @@ When you need to use the screenshot monitoring feature:
 
 💡 **Note**: The monitor needs to be manually started when you want to use this feature. This gives you control over when screenshots are automatically processed, preserving normal Windows screenshot behavior when not needed.
 
+⚠️ **Important**: The service will automatically stop when you close the terminal. This ensures normal Windows screenshot functionality is restored after your session ends.
+
 ### 🔧 Manual control commands (run in WSL2)
 
 ```bash
@@ -102,8 +104,8 @@ screenshot-help
 
 - **Manual control**: Start the monitor only when you need to use the screenshot feature
 - **Preserve normal behavior**: When monitor is stopped, Windows screenshots work normally
-- **Background persistence**: Once started, monitor continues working after closing terminal
-- **Stop when done**: Run `stop-screenshot-monitor` to restore normal Windows screenshot behavior
+- **Session-based**: Service stops automatically when terminal closes (no background persistence)
+- **Stop manually**: Run `stop-screenshot-monitor` to stop before closing terminal
 
 ## 🎬 Demo
 
@@ -157,9 +159,10 @@ source ~/.zshrc  # or ~/.bashrc
 ### 🔧 How it works
 
 1. **PowerShell Monitor Script** (`auto-clipboard-monitor.ps1`)
-   - Runs in Windows background, monitoring clipboard changes
+   - Runs in Windows background while terminal is open
    - Auto-saves to WSL2's `~/.screenshots/` directory when image detected
    - Copies file path to both Windows and WSL2 clipboard
+   - Stops automatically when terminal closes
 
 2. **WSL2 Management Script** (`screenshot-functions.sh`)
    - Provides convenient control commands

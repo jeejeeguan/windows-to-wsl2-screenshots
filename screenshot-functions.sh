@@ -3,6 +3,9 @@
 # Windows-to-WSL2 Screenshot Automation Functions
 # Auto-saves screenshots from Windows clipboard to WSL2 and manages clipboard sync
 
+# Set installation directory when sourced
+SCREENSHOT_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Start the auto-screenshot monitor
 start-screenshot-monitor() {
     echo "🚀 Starting Windows-to-WSL2 screenshot automation..."
@@ -13,9 +16,8 @@ start-screenshot-monitor() {
     # Create screenshots directory in home
     mkdir -p "$HOME/.screenshots"
     
-    # Get current directory to find the PowerShell script
-    local script_dir="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-    local ps_script="$script_dir/auto-clipboard-monitor.ps1"
+    # Use the installation directory
+    local ps_script="$SCREENSHOT_INSTALL_DIR/auto-clipboard-monitor.ps1"
     
     if [ ! -f "$ps_script" ]; then
         echo "❌ PowerShell script not found at: $ps_script"
@@ -23,8 +25,8 @@ start-screenshot-monitor() {
         return 1
     fi
     
-    # Start the monitor in background
-    nohup powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "$ps_script" > "$HOME/.screenshots/monitor.log" 2>&1 &
+    # Start the monitor in background (will stop when terminal closes)
+    powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "$ps_script" > "$HOME/.screenshots/monitor.log" 2>&1 &
     
     echo "✅ SCREENSHOT AUTOMATION IS NOW RUNNING!"
     echo ""
@@ -37,6 +39,8 @@ start-screenshot-monitor() {
     echo "📁 Images save to: $HOME/.screenshots/"
     echo "🔗 Latest always at: $HOME/.screenshots/latest.png"
     echo "📋 Drag & drop images to $HOME/.screenshots/ also works!"
+    echo ""
+    echo "⚠️  NOTE: Service will stop when you close this terminal"
 }
 
 # Stop the monitor

@@ -70,6 +70,8 @@ source ~/.zshrc  # 或 source ~/.bashrc
 
 💡 **注意**：监控器需要在你想使用此功能时手动启动。这让你可以控制何时自动处理截图，在不需要时保留正常的 Windows 截图行为。
 
+⚠️ **重要**：服务会在你关闭终端时自动停止。这确保你的会话结束后，正常的 Windows 截图功能会自动恢复。
+
 ### 🔧 手动控制命令（在 WSL2 中执行）
 
 ```bash
@@ -102,8 +104,8 @@ screenshot-help
 
 - **手动控制**：仅在需要使用截图功能时启动监控器
 - **保留正常行为**：监控器停止时，Windows 截图功能正常工作
-- **后台持续运行**：一旦启动，关闭终端后监控器继续工作
-- **完成后停止**：运行 `stop-screenshot-monitor` 恢复正常的 Windows 截图行为
+- **会话基础**：服务会在终端关闭时自动停止（不会后台持续运行）
+- **手动停止**：运行 `stop-screenshot-monitor` 可在关闭终端前停止服务
 
 ## 🎬 演示
 
@@ -157,9 +159,10 @@ source ~/.zshrc  # 或 ~/.bashrc
 ### 🔧 工作原理
 
 1. **PowerShell 监控脚本**（`auto-clipboard-monitor.ps1`）
-   - 在 Windows 后台运行，监控剪贴板变化
+   - 在终端打开期间于 Windows 后台运行
    - 检测到图片时自动保存到 WSL2 的 `~/.screenshots/` 目录
    - 将文件路径复制到 Windows 和 WSL2 剪贴板
+   - 终端关闭时自动停止
 
 2. **WSL2 管理脚本**（`screenshot-functions.sh`）
    - 提供便捷的控制命令
