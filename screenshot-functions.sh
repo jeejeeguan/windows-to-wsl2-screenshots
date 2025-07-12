@@ -3,8 +3,23 @@
 # Windows-to-WSL2 Screenshot Automation Functions
 # Auto-saves screenshots from Windows clipboard to WSL2 and manages clipboard sync
 
-# Set installation directory - use absolute path to ensure it works from anywhere
-SCREENSHOT_INSTALL_DIR="/home/jeejee/projects/windows-to-wsl2-screenshots"
+# Set installation directory dynamically to work for all users
+# Use multiple fallback methods to ensure reliable path detection
+if [ -n "${BASH_SOURCE[0]}" ]; then
+    SCREENSHOT_INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    # Fallback: assume script is in current directory
+    SCREENSHOT_INSTALL_DIR="$(pwd)"
+fi
+
+# Validate installation directory and provide helpful feedback
+if [ ! -f "$SCREENSHOT_INSTALL_DIR/auto-clipboard-monitor.ps1" ]; then
+    echo "⚠️  WARNING: PowerShell script not found in detected directory"
+    echo "📍 Detected directory: $SCREENSHOT_INSTALL_DIR"
+    echo "🔍 BASH_SOURCE[0]: ${BASH_SOURCE[0]:-'(not set)'}"
+    echo "💡 Please ensure you've cloned the repository completely"
+    echo "💡 Make sure to source this script from the project directory"
+fi
 
 # Start the auto-screenshot monitor
 start-screenshot-monitor() {
@@ -27,8 +42,12 @@ start-screenshot-monitor() {
     local ps_script="$SCREENSHOT_INSTALL_DIR/auto-clipboard-monitor.ps1"
     
     if [ ! -f "$ps_script" ]; then
-        echo "❌ PowerShell script not found at: $ps_script"
-        echo "💡 Make sure auto-clipboard-monitor.ps1 is in the same directory as this script"
+        echo "❌ PowerShell script not found!"
+        echo "📍 Expected location: $ps_script"
+        echo "🔍 Installation directory: $SCREENSHOT_INSTALL_DIR"
+        echo "🔍 Script file sourced from: ${BASH_SOURCE[0]}"
+        echo "💡 Solution: Make sure you've cloned the complete repository and sourced from the correct location"
+        echo "💡 Try: cd /path/to/windows-to-wsl2-screenshots && source screenshot-functions.sh"
         return 1
     fi
     
